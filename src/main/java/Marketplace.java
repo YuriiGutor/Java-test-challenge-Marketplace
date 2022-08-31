@@ -1,6 +1,21 @@
-import java.util.Scanner;
+//import java.util.Scanner;
+import java.math.BigDecimal;
+import java.util.*;
 
 public class Marketplace {
+    private static List<User> users = new ArrayList<>(Arrays.asList(
+            new User( 1, "Lena", "Ivanova", new BigDecimal("100.50")),
+            new User(2, "Ira", "Petrova", new BigDecimal("500.00")),
+            new User(3, "Oleg", "Shevchenko", new BigDecimal("1000.01"))
+    ));
+
+    private static List<Product> marketProdukts = new ArrayList<>(Arrays.asList(
+            new Product(1, "Beer", new BigDecimal("50.25")),
+            new Product(2, "Chicken", new BigDecimal("150.00")),
+            new Product(3, "Nuts", new BigDecimal("50.00"))
+    ));
+
+
     public static void main (String[] args){
         Scanner in = new Scanner(System.in);
         String  MarketplaceMenu [] = {     // Пункти головного меню у вигляді масиву строк
@@ -13,19 +28,11 @@ public class Marketplace {
         };
 
         int menuId = 1;     // перемінна для вибору пункту меню
-        int menuIdlevel2 = 0;
-        User User1 = new User( 1, "Lena", "Ivanova", 100);
-        User User2 = new User(2, "Ira", "Petrova", 500);
-        User User3 = new User(3, "Oleg", "Shevchenko", 1000);
+        int menuIdlevel2 = 0;// перемінна для вибору пункту меню 2-го рівня
 
-        Product Product1 = new Product(1, "Beer", 50);
-        Product Product2 = new Product(2, "Chicken", 150);
-        Product Product3 = new Product(3, "Nuts", 50);
-
-
-
-        for ( ;menuId != MarketplaceMenu.length; ){   //нескінченний цикл виконання програми, для виходу ідентифікатор меню має відповідати останньому пункту меню
-            System.out.print("\033[H\033[J"); // очищує консоль
+        while ( menuId != MarketplaceMenu.length ){   //нескінченний цикл виконання програми, для виходу ідентифікатор меню має відповідати останньому пункту меню
+//            System.out.print("\033[H\033[J"); // очищує консоль  (не працює?)
+            System.out.println("\n");
             for(int i = 0; i < MarketplaceMenu.length; i++){  // Виведення головного меню
                 System.out.print(i+1);
                 System.out.println(". " + MarketplaceMenu[i]);
@@ -33,49 +40,89 @@ public class Marketplace {
             System.out.println("Сhoose a menu item by dialing its number: ");
             menuId = in.nextInt();
             switch (menuId) {
-                case 1:
+                case 1://Вивід користувачів
                     System.out.println("Your choice: " + menuId + ". " + MarketplaceMenu[menuId-1]);
-                    //Вивід користувачів
-                    System.out.print("\033[H\033[J"); // очищує консоль
-                    User1.out();
-                    User2.out();
-                    User3.out();
-                    System.out.print("Для повернення натисніть будь яку цифру");
+                    for(User user : users){    //Вивід користувачів
+                        System.out.println(user);
+                    }
+                    //
+                    System.out.print("To return main menu, select any number");
                     menuIdlevel2 = in.nextInt();
                     break;
-                case 2:
+                case 2://Вивід продуктів Маркетплейсу
                     System.out.println("Your choice: " + menuId + ". " + MarketplaceMenu[menuId-1]);
-                    //Вивід продуктів Маркетплейсу
-                    System.out.print("\033[H\033[J"); // очищує консоль
-                    Product1.out();
-                    Product2.out();
-                    Product3.out();
-                    System.out.print("Для повернення виберіть будь яку цифру");
+                    System.out.println("\n");
+                    for (Product product : marketProdukts) {  //Вивід продуктів Маркетплейсу
+                        System.out.println(product);
+                    }
+                    System.out.print("To return main menu, select any number");
                     menuIdlevel2 = in.nextInt();
                     break;
-                case 3:
+                case 3:   //Купівля продуктів користувачем
                     System.out.println("Your choice: " + menuId + ". " + MarketplaceMenu[menuId-1]);
-                    //Купівля продуктів користувачем
-                    System.out.print("\033[H\033[J"); // очищує консоль
+                    System.out.println("Enter: Id of user who want to buy product");
+                    int idUserBuy = in.nextInt();
+                    System.out.println("Enter: Id of  product which user want to buy");
+                    int idProductBuy = in.nextInt();
+                    User selectedUser = getUserById(idUserBuy);
+                    Product selectedProduct = getProductById(idProductBuy);
+                    if (selectedProduct.getPrice().longValue() >=    selectedUser.getCash().longValue()){
+                        System.out.println("Sorry, but the user does not have enough money in their account to make a purchase");
+                    }
+                    else {
+                        selectedUser.addProduct(selectedProduct);
+                        BigDecimal result = selectedUser.getCash().subtract(selectedProduct.getPrice());
+                        selectedUser.setCash( result);
+                        System.out.println("Congratulations. The product \"" + selectedProduct.getName() + "\" has been purchased user: " + selectedUser.getName() );
+                    }
+                    System.out.println("To return main menu, select any number");
+                    menuIdlevel2 = in.nextInt();
                     break;
-                case 4:
+                case 4://Відображення продуктів користувача
                     System.out.println("Your choice: " + menuId + ". " + MarketplaceMenu[menuId-1]);
-                    //Відображення продуктів користувача
-                    System.out.print("\033[H\033[J"); // очищує консоль
+                    System.out.println("Enter: Id of user: ");
+                    int idUser = in.nextInt();
+                    selectedUser = getUserById(idUser);
+                    selectedUser.printPurchaseUser();
+                    System.out.println("To return main menu, select any number");
+                    menuIdlevel2 = in.nextInt();
                     break;
-                case 5:
+                case 5://список користувачів, які купили продукт, за ідентифікатором продукту
                     System.out.println("Your choice: " + menuId + ". " + MarketplaceMenu[menuId-1]);
-                    //список користувачів, які купили продукт, за ідентифікатором продукту
-                    System.out.print("\033[H\033[J"); // очищує консоль
+                    System.out.println("Enter: Id of product: ");
+                    int idProduct = in.nextInt();
+                    selectedProduct = getProductById(idProduct);
+                    for(User user : users) {  //Перебір користувачів
+                        for (Product product : user.getpurchaseUser()) {// перебір продуктів користувача
+                            if ( product == selectedProduct) {
+                                System.out.println(user.getName());
+                            }
+                        }
+                    }
+                    System.out.println("To return main menu, select any number");
+                    menuIdlevel2 = in.nextInt();
                     break;
                 case 6:   //Вихід з програми
-                    System.out.print("\033[H\033[J"); // очищує консоль
-                    System.out.print("You have chosen to exit the program. \nThank you for using our program");
+                    System.out.println("You have chosen to exit the program. \nThank you for using our program");
             }
         }
 
         in.close();
 
+    }
+
+    public static User getUserById(int id) {
+        for (User user : users) {
+            if(user.getId() == id) return user;
+        }
+        return null;
+    }
+
+    public static Product getProductById(int id) {
+        for (Product product : marketProdukts) {
+            if(product.getId() == id) return product;
+        }
+        return null;
     }
 
 }
